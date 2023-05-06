@@ -2,6 +2,7 @@ const { QMainWindow, QWidget, QMimeData, QLabel, FlexLayout, QPushButton, QIcon,
 const win = new QMainWindow();
 const findFirstTimeAboveThreshold = require('./timeAboveThreshold.js');
 const wavSlice = require('./wavSlice.js');
+const mixWavsData = require('./outputCSV.js');
 const path = require('path');
 
 win.setWindowTitle("WavSlice");
@@ -35,14 +36,13 @@ const events = [
 centralWidget.addEventListener(WidgetEventTypes.Drop, event => {
   const dropEvent = new QDropEvent(event);
   let mimeData = dropEvent.mimeData();
-  console.log('dropped', dropEvent.type());
   let urls = mimeData.urls();
   for (let url of urls) {
     let str = url.toString();
     let wavPath = {"wavpath": str.replace('file:///', ''), "time": -1};
     if(!wavsData.some(item => item.wavpath === wavPath.wavpath)){
       wavsData.push(wavPath);
-      droppedFileCount += urls.length;
+      droppedFileCount = urls.length;
     }
     console.log(wavsData); //Example of inspection of dropped data.
 
@@ -92,10 +92,22 @@ slicebutton.addEventListener('clicked', async () => {
 //Output CSV button
 const outputCSVbutton = new QPushButton();
 outputCSVbutton.setText("Output CSV");
+outputCSVbutton.addEventListener('clicked', () => {
+  if (wavsData.length > 0) { 
+    try {
+      mixWavsData(wavsData);
+    } catch (e) { 
+      win.alert(e);
+    }
+  }
+});
+
+
+//Clear button
 const clearButton = new QPushButton();
 clearButton.setText("Clear");
 clearButton.addEventListener('clicked', () => {
-  wavsPath = [];
+  wavsData= [];
   droppedFileCount = 0;
   fileCountLabel.setText(`Dropped files: ${droppedFileCount}`);
   console.log('cleared');
@@ -136,3 +148,5 @@ win.setStyleSheet(`
 win.show();
 
 global.win = win;
+
+module.exports = wavsData;
