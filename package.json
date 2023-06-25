@@ -2,7 +2,10 @@
   "name": "nodegui-starter",
   "version": "1.0.0",
   "main": "index.js",
-  "author": "Atul R <atulanand94@gmail.com>",
+  "bin": {
+    "your-app": "./src/index.js"
+  },
+  "author": "nsmcheckit>",
   "license": "MIT",
   "private": true,
   "scripts": {
@@ -11,13 +14,15 @@
     "debug": "webpack && qode --inspect ./dist/index.js"
   },
   "dependencies": {
-    "@nodegui/nodegui": "^0.57.1",
+    "@nodegui/nodegui": "^0.59.2",
     "audio-buffer-utils": "^5.1.2",
     "audio-decode": "^2.1.3",
     "audiobuffer-to-wav": "^1.0.0",
     "csv-writer": "^1.6.0",
     "exceljs": "^4.3.0",
     "lodash": "^4.17.21",
+    "node-notifier": "^10.0.1",
+    "node-xlsx": "^0.23.0",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {

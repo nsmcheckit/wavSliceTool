@@ -5,25 +5,37 @@ const wavsData = require('./index.js');
 const ExcelJS = require('exceljs');
 const { flatMapDeep } = require('lodash');
 const XLSX = require('xlsx');
+const xlsx = require('node-xlsx');
+const notifier = require('node-notifier');
+
 
 const directoryPath = './wavOutput';
+const oldFilePath = './csvTable/Output/Old.xlsx';
 const outputFilePath = './csvTable/Output/Output.xlsx';
+const oldDataIds = [];
+var oldDataJson = {};
 
 async function oldXlsxToJson() {
-    const ExcelJS = require('exceljs');
-    const workbook = new ExcelJS.Workbook();
-
-    // 读取 Excel 文件
-    await workbook.xlsx.readFile(outputFilePath);
-
-    // 获取第一个 sheet
-    const worksheet = workbook.worksheets[0];
-
-    // 将所有行的数据存储为数组
-    const oldRows = worksheet.getSheetValues();
-    // 打印数组
-    console.log(oldRows);
-
+    if (fs.existsSync(oldFilePath)){
+        const workSheetsFromFile = xlsx.parse(oldFilePath);
+        const oldData = workSheetsFromFile[0].data.slice(1);
+        oldData.forEach(()=>{
+        oldDataIds.push(oldData[0][0]);
+    });
+        console.log(oldDataIds);
+        oldDataJson = oldData.reduce((obj, item) => {
+        const key = item[0];
+        obj[key] = item;
+        return obj;
+    }, {});
+        console.log(oldDataJson);
+    }
+    else{
+        notifier.notify({
+            title: 'warning',
+            message: 'No old file'
+        });
+    }
 }
 
 async function mixWavsData(data) {
@@ -109,9 +121,14 @@ async function mixWavsData(data) {
 
     rows = rows.filter(el => el);//去除空元素
     const arrayRows = rows.map((obj) => Object.values(obj));
-    console.log(events);
-    console.log(arrayRows);
-
+    const allIds = [...ids, ...oldDataIds];
+    console.log(allIds);
+    allIds.forEach((id)=>{
+        console.log(id);
+        if(!ids.includes(id)){
+            arrayRows.push(oldDataJson[id]);
+        }
+    });
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Sheet1');
     worksheet.addRow(['技能ID', '技能说明', '第一帧触发的event', '过程技能event', '击中event', '目标区域event']);
