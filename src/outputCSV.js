@@ -19,16 +19,19 @@ async function oldXlsxToJson() {
     if (fs.existsSync(oldFilePath)){
         const workSheetsFromFile = xlsx.parse(oldFilePath);
         const oldData = workSheetsFromFile[0].data.slice(1);
-        oldData.forEach(()=>{
-        oldDataIds.push(oldData[0][0]);
+        //console.log(oldData);
+        oldData.forEach((item)=>{
+            if(item!=null){
+                oldDataIds.push(item[0]);
+            }
     });
-        console.log(oldDataIds);
+        //console.log(oldDataIds);
         oldDataJson = oldData.reduce((obj, item) => {
         const key = item[0];
         obj[key] = item;
         return obj;
     }, {});
-        console.log(oldDataJson);
+        //console.log(oldDataJson);
     }
     else{
         notifier.notify({
@@ -43,7 +46,8 @@ async function mixWavsData(data) {
     const events = {};
     data.forEach((obj) => {
         const filePath = obj.wavpath;
-        const fileName = path.parse(filePath).name;
+        const fileName = path.parse(filePath).name.replace("-","_");
+        console.log(fileName);
         events[fileName] = {};
         try {
             events[fileName]['id'] = events[fileName]['id'] = parseInt((fileName.split('_')[1].match(/\d+/))[0]);
@@ -122,9 +126,9 @@ async function mixWavsData(data) {
     rows = rows.filter(el => el);//去除空元素
     const arrayRows = rows.map((obj) => Object.values(obj));
     const allIds = [...ids, ...oldDataIds];
-    console.log(allIds);
+    //console.log(allIds);
     allIds.forEach((id)=>{
-        console.log(id);
+        //console.log(id);
         if(!ids.includes(id)){
             arrayRows.push(oldDataJson[id]);
         }
